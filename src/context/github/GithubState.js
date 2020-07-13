@@ -4,6 +4,7 @@ import GithubContext from './githubContext';
 import GithubReducer from './githubReducer';
 import {
    SEARCH_USERS,
+   LOAD_MORE_USERS,
    SET_LOADING,
    CLEAR_USERS,
    GET_USER,
@@ -27,6 +28,7 @@ const GithubState = props => {
       users: [],
       user: {},
       repos: [],
+      nextLink: null,
       loading: false
    }
 
@@ -38,12 +40,53 @@ const GithubState = props => {
       const res = await axios.get(
         `https://api.github.com/search/users?q=${text}&client_id=${githubClientId}&client_secret=${githubClientSecret}`
       );
-  
+ 
+      var parse = require('parse-link-header');
+      var linkHeader = res.headers.link;
+      
+      var parsed = parse(linkHeader);
+      console.log(parsed);
+
+      var next = parsed.next.url;
+
+      console.log(`NEXT 1: ${next}`);
+
       dispatch({
          type: SEARCH_USERS,
-         payload: res.data.items
+         payload: {
+            nextLink: next,
+            users: res.data.items
+         }
       })
    };
+
+   const loadMoreUsers = async () => {
+      setLoading();
+  
+      const res = await axios.get(state.nextLink);
+
+ 
+      var parse = require('parse-link-header');
+      var linkHeader = res.headers.link;
+      
+      var parsed = parse(linkHeader);
+      console.log(parsed);
+
+      var next = parsed.next.url;
+
+      console.log(`NEXT 2: ${next}`);
+
+      dispatch({
+         type: LOAD_MORE_USERS,
+         payload: {
+            nextLink: next,
+            users: res.data.items
+         }
+      })
+
+      console.log(state.users)
+      console.log(state.nextLink)
+   }
 
    const getUser = async username => {
       setLoading();
@@ -80,11 +123,13 @@ const GithubState = props => {
          users: state.users,
          user: state.user,
          repos: state.repos,
+         nextLink: state.nextLink,
          loading: state.loading,
          searchUsers,
          clearUsers,
          getUser,
-         getUserRepos
+         getUserRepos,
+         loadMoreUsers
       }}
    >
       {props.children}

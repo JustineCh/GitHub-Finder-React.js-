@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import UserItem from './UserItem';
+import LoadMoreUsers from "./LoadMoreUsers";
 import Spinner from '../layout/Spinner';
 import GithubContext from '../../context/github/githubContext'
 
@@ -12,10 +13,13 @@ const Users = () => {
       return <Spinner />
    } else {
       return (
-         <div style={userStyle}>
-            {users.map(user => (
-               <UserItem key={user.id} user={user} />
-            ))}
+         <div>
+            <div style={userStyle}>
+               {users.map(user => (
+                  <UserItem key={user.id} user={user} />
+               ))}
+            </div>
+            {users.length > 0 && <LoadMoreUsers />}
          </div>
       )
    }
