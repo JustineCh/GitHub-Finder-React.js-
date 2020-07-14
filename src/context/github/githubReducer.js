@@ -8,9 +8,26 @@ import {
 } from '../types';
 import { getNodeText } from '@testing-library/react';
 
+const findElbyId = (arr, id) => {
+   for(let e in arr){
+      if(arr[e].id === id){
+         return arr[e]
+      }
+   }
+   return null
+} 
+
+const deduplicateIds = (arr1) => {
+   const result = [];
+      arr1.forEach(element => {
+         if(findElbyId(result, element.id) === null){
+            result.push(element)
+         };
+      });
+   return result;
+}
+
 export default (state, action) => {
-   // console.log(`STATE: ${JSON.stringify(state)}`);
-   // console.log(`ACTION: ${JSON.stringify(action)}`);
    switch(action.type) {
       case CLEAR_USERS:
          return {
@@ -28,9 +45,8 @@ export default (state, action) => {
       case LOAD_MORE_USERS:
          return {
             ...state,
-            users: state.users.concat(action.payload.users),
-            nextLink: action.payload.nextLink,
-            loading: false
+            users: deduplicateIds(state.users.concat(action.payload.users)),
+            nextLink: action.payload.nextLink
          }
       case GET_USER:
          return {

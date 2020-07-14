@@ -34,6 +34,15 @@ const GithubState = props => {
 
    const [state, dispatch] = useReducer(GithubReducer, initialState);
 
+   var next;
+
+   const parseLinkHeader = (res) => {
+      var parse = require('parse-link-header');
+      var linkHeader = res.headers.link;
+      var parsed = parse(linkHeader);
+      return next = parsed?.next.url;
+   }
+
    const searchUsers = async text => {
       setLoading();
   
@@ -41,15 +50,7 @@ const GithubState = props => {
         `https://api.github.com/search/users?q=${text}&client_id=${githubClientId}&client_secret=${githubClientSecret}`
       );
  
-      var parse = require('parse-link-header');
-      var linkHeader = res.headers.link;
-      
-      var parsed = parse(linkHeader);
-      console.log(parsed);
-
-      var next = parsed.next.url;
-
-      console.log(`NEXT 1: ${next}`);
+      parseLinkHeader(res);
 
       dispatch({
          type: SEARCH_USERS,
@@ -61,20 +62,9 @@ const GithubState = props => {
    };
 
    const loadMoreUsers = async () => {
-      setLoading();
-  
       const res = await axios.get(state.nextLink);
 
- 
-      var parse = require('parse-link-header');
-      var linkHeader = res.headers.link;
-      
-      var parsed = parse(linkHeader);
-      console.log(parsed);
-
-      var next = parsed.next.url;
-
-      console.log(`NEXT 2: ${next}`);
+      parseLinkHeader(res);
 
       dispatch({
          type: LOAD_MORE_USERS,
@@ -83,9 +73,6 @@ const GithubState = props => {
             users: res.data.items
          }
       })
-
-      console.log(state.users)
-      console.log(state.nextLink)
    }
 
    const getUser = async username => {

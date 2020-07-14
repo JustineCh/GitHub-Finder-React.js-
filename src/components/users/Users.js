@@ -7,7 +7,7 @@ import GithubContext from '../../context/github/githubContext'
 const Users = () => {
    const githubContext = useContext(GithubContext);
 
-   const {users, loading} = githubContext;
+   const {users, loading, nextLink} = githubContext;
 
    if (loading) {
       return <Spinner />
@@ -19,7 +19,7 @@ const Users = () => {
                   <UserItem key={user.id} user={user} />
                ))}
             </div>
-            {users.length > 0 && <LoadMoreUsers />}
+            {nextLink && <LoadMoreUsers />}
          </div>
       )
    }
